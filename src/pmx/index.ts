@@ -6,7 +6,7 @@ import autocast from "./cast";
 function configureModule(opts: any) {
   ipcSend({
     type: "axm:option:configuration",
-    data: opts
+    data: opts,
   });
 }
 

@@ -6,7 +6,7 @@ const common_strings = {
   false: false,
   undefined: undefined,
   null: null,
-  NaN: NaN
+  NaN: NaN,
 } as Record<string, any>;
 
 function process(key: string, value: any, o: Record<string, any>) {

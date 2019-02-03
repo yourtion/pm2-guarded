@@ -1,15 +1,25 @@
 {
   "name": "pm2-guarded",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "pm2 guarded",
   "main": "dist/index.js",
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "^10.5.8"
+    "@types/node": "^10.5.8",
+    "prettier": "^1.16.3"
   },
   "scripts": {
     "dev": "pm2 kill && pm2 install . && pm2 logs 0",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tag": "git tag v`node -p 'require(\"./package\").version'`",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "compile": "tsc && prettier --single-quote --write \"dist/**/*.{js,ts}\"",
+    "prepublishOnly": "npm run format && npm run compile",
+    "postpublish": "npm run tag && git push && git push --tags"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "trailingComma": "es5"
   },
   "repository": {
     "type": "git",
