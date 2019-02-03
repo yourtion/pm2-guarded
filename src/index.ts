@@ -1,4 +1,4 @@
-import { initPmx } from "./utils/pmx";
+import { initPmx } from "./pmx";
 
 const config = initPmx();
 console.log(config);
