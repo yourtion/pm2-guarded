@@ -1,26 +1,32 @@
 {
-  "name": "sample-module",
+  "name": "pm2-guarded",
   "version": "1.0.0",
-  "description": "PM2 Sample Module",
-  "main": "app.js",
-  "dependencies": {
-    "pmx": "beta"
+  "description": "pm2 guarded",
+  "main": "dist/index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/keymetrics/pmx.git"
+    "url": "git+https://github.com/yourtion/pm2-guarded.git"
   },
-  "config": {
-    "conf_var_1": true,
-    "conf_var_2": "myvalue"
+  "keywords": [
+    "pm2",
+    "guarded"
+  ],
+  "author": "Yourtion <yourtion@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourtion/pm2-guarded/issues"
   },
+  "homepage": "https://github.com/yourtion/pm2-guarded#readme",
   "apps": [
     {
       "merge_logs": true,
       "max_memory_restart": "200M",
       "script": "app.js"
     }
-  ],
-  "author": "Keymetrics Inc.",
-  "license": "MIT"
+  ]
 }
