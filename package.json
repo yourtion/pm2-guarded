@@ -8,6 +8,7 @@
     "@types/node": "^10.5.8"
   },
   "scripts": {
+    "dev": "pm2 kill && pm2 install . && pm2 logs 0",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
