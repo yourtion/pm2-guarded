@@ -6,7 +6,8 @@
   "dependencies": {},
   "devDependencies": {
     "@types/node": "^10.5.8",
-    "prettier": "^1.16.3"
+    "prettier": "^1.16.3",
+    "typescript": "^3.3.1"
   },
   "scripts": {
     "dev": "pm2 kill && pm2 install . && pm2 logs 0",
