@@ -42,7 +42,7 @@ export default class SystemInfo {
   getInfo() {
     const load = os.loadavg();
     return {
-      cpuUsage: this.cpuUsage,
+      cpu: this.cpuUsage,
       freemem: 1 - os.freemem() / this.totalmem,
       load5: load[0],
       load10: load[1],
