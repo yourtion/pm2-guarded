@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "pm2 guarded",
   "main": "dist/index.js",
-  "dependencies": {},
+  "dependencies": {
+    "influx": "^5.0.7"
+  },
   "devDependencies": {
     "@types/node": "^10.5.8",
     "prettier": "^1.16.3",
