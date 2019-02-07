@@ -23,18 +23,20 @@ export default class SystemInfo {
   public hostname = os.hostname();
   private cpuUsage: number = 0;
 
-  constructor() {
-    setInterval(this.fetch.bind(this), 1000);
+  constructor(interval = 1000) {
+    setInterval(this.fetch.bind(this), interval);
   }
 
   private fetch() {
     // cpuUsage Info
     const startMeasure = computeUsage();
+    const t = process.uptime();
     setTimeout(_ => {
       const endMeasure = computeUsage();
+      const spent = Math.floor((process.uptime() - t) * 1000);
       var idleDifference = endMeasure.idle - startMeasure.idle;
       var totalDifference = endMeasure.total - startMeasure.total;
-      var percentageCPU = (10000 - Math.round((10000 * idleDifference) / totalDifference)) / 100;
+      var percentageCPU = (10000 - Math.round((10000 * idleDifference) / totalDifference)) / spent;
       this.cpuUsage = percentageCPU;
     }, 100);
   }
