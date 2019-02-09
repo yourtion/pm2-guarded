@@ -17,7 +17,7 @@ function serializer(replacer: replacerType | null = null, cycleReplacer: replace
 
   return function(this: replacerType, key: any, value: any) {
     if (stack.length > 0) {
-      var thisPos = stack.indexOf(this);
+      const thisPos = stack.indexOf(this);
       ~thisPos ? stack.splice(thisPos + 1) : stack.push(this);
       ~thisPos ? keys.splice(thisPos, Infinity, key) : keys.push(key);
       if (~stack.indexOf(value)) value = cycleReplacer!.call(this, key, value);

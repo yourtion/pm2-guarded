@@ -34,10 +34,12 @@ export default class SystemInfo {
     setTimeout(_ => {
       const endMeasure = computeUsage();
       const spent = Math.floor((process.uptime() - t) * 1000);
-      var idleDifference = endMeasure.idle - startMeasure.idle;
-      var totalDifference = endMeasure.total - startMeasure.total;
-      var percentageCPU = (10000 - Math.round((10000 * idleDifference) / totalDifference)) / spent;
-      this.cpuUsage = percentageCPU;
+      const idleDifference = endMeasure.idle - startMeasure.idle;
+      const totalDifference = endMeasure.total - startMeasure.total;
+      const percentageCPU = (10000 - Math.round((10000 * idleDifference) / totalDifference)) / spent;
+      if (!isNaN(percentageCPU)) {
+        this.cpuUsage = percentageCPU;
+      }
     }, 100);
   }
 
