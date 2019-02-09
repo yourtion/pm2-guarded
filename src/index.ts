@@ -38,7 +38,7 @@ if (config.influxdb) {
       }
       await influx.writePoints(data);
     } catch (error) {
-      logger.error(error);
+      logger.error(error.message || error);
     } finally {
       SEDNING = false;
     }
