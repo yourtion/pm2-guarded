@@ -70,15 +70,18 @@ export default class NginxStatus {
     const accepts = getRegxInfoNum(infoArr[2], 1);
     const handled = getRegxInfoNum(infoArr[2], 2);
     const requests = getRegxInfoNum(infoArr[2], 3);
-    const result = { active: 0, accepts: 0, handled: 0, requests: 0, reading: 0, writing: 0, waiting: 0, timestamp };
+    const result = {
+      data: { active: 0, accepts: 0, handled: 0, requests: 0, reading: 0, writing: 0, waiting: 0 },
+      timestamp,
+    };
     // 计算accepts、handled、requests增长量
-    result.active = getRegxInfoNum(infoArr[0], 1);
-    result.accepts = accepts >= this.lastAccepts ? accepts - this.lastAccepts : accepts;
-    result.handled = handled >= this.lastHandled ? handled - this.lastHandled : handled;
-    result.requests = requests >= this.lastRequests ? requests - this.lastRequests : requests;
-    result.reading = getRegxInfoNum(infoArr[3], 1);
-    result.writing = getRegxInfoNum(infoArr[3], 2);
-    result.waiting = getRegxInfoNum(infoArr[3], 3);
+    result.data.active = getRegxInfoNum(infoArr[0], 1);
+    result.data.accepts = accepts >= this.lastAccepts ? accepts - this.lastAccepts : accepts;
+    result.data.handled = handled >= this.lastHandled ? handled - this.lastHandled : handled;
+    result.data.requests = requests >= this.lastRequests ? requests - this.lastRequests : requests;
+    result.data.reading = getRegxInfoNum(infoArr[3], 1);
+    result.data.writing = getRegxInfoNum(infoArr[3], 2);
+    result.data.waiting = getRegxInfoNum(infoArr[3], 3);
     this.lastAccepts = accepts;
     this.lastHandled = handled;
     this.lastRequests = requests;

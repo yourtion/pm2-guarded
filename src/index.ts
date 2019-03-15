@@ -4,11 +4,16 @@ import SystemInfo from "./utils/sysinfo";
 import Logger from "./utils/log";
 import exec from "./utils/exec";
 import parsePM2Data from "./utils/pm2";
+import NginxStatus from "./utils/nginx";
 
 const config = initPmx();
 const logger = new Logger(config.debug);
 
-// let EVENTS: Record<string, any>[] = [];
+enum KEYS {
+  Nginx,
+}
+
+let EVENTS: [KEYS, any][] = [];
 let SEDNING = false;
 
 if (config.influxdb) {
@@ -20,21 +25,51 @@ if (config.influxdb) {
   const system = new SystemInfo(fetchInterval);
   const influx = new InfluxDB(config.influxdb);
 
+  // Nginx
+  if (config.nginx) {
+    try {
+      const url = new URL(config.nginx);
+      logger.debug(url);
+      const ng = new NginxStatus({ host: url.host, port: Number(url.port || 80), path: url.pathname });
+      setInterval(async function() {
+        const info = await ng.getStatus();
+        if (info) EVENTS.push([KEYS.Nginx, info]);
+      }, fetchInterval);
+    } catch (error) {
+      logger.error("Nginx config error", error);
+    }
+  }
+
   setInterval(async function() {
     if (SEDNING) return;
     logger.debug("Start SEDNING");
     SEDNING = true;
     try {
+      const data: IPoint[] = [];
+      // 处理系统信息
       const sysInfo = system.getInfo();
       const timestamp = new Date();
       const host = system.hostname;
       logger.debug(sysInfo);
-      const data: IPoint[] = [];
       data.push({ measurement: "sysinfo", tags: { host }, fields: sysInfo, timestamp });
+      // 处理PM2信息
       const pm2Data = await exec("pm2 jlist");
       const pm2Info = parsePM2Data(pm2Data) || [];
       for (const info of pm2Info) {
         data.push({ measurement: "app", tags: { host, app: info.name, ins: info.instance }, fields: info, timestamp });
+      }
+      // 处理事件记录
+      const events = EVENTS;
+      EVENTS = [];
+      for (const event of events) {
+        switch (event[0]) {
+          // 执行Nginx相关数据推送
+          case KEYS.Nginx:
+            data.push({ measurement: "nginx", tags: { host }, fields: event[1].data, timestamp: event[1].timestamp });
+            break;
+          default:
+            break;
+        }
       }
       await influx.writePoints(data);
     } catch (error) {
@@ -47,6 +82,7 @@ if (config.influxdb) {
 } else {
   // run empty loop
   logger.info("Run `pm2 set pm2-guarded:influxdb http://user:pass@host:port/db` to start monit");
+  logger.info("Run `pm2 set pm2-guarded:nginx http://127.0.0.1/nginx_status` to add Nginx monit");
   logger.info("Run `pm2 set pm2-guarded:fetchInterval 1000` to set info fetch interval");
   logger.info("Run `pm2 set pm2-guarded:sendInterval 5000` to set data send interval");
   setInterval(() => {}, 60000);
