@@ -1,3 +1,5 @@
+import * as http from "http";
+
 const REGS = [
   /Active connections\: ([0-9]+)/i,
   /server accepts handled requests/i,
@@ -16,7 +18,47 @@ export default class NginxStatus {
   private lastRequests = -1;
   private inited = false;
 
-  parseResult(info: string = "", timestamp: Date) {
+  private host: string;
+  private port: number;
+  private path: string;
+  private agent: http.Agent;
+
+  constructor({ host = "127.0.0.1", port = 80, path = "/nginx_status" }) {
+    this.host = host;
+    this.port = port;
+    this.path = path;
+    this.agent = new http.Agent({ keepAlive: true });
+  }
+
+  async getStatus() {
+    try {
+      const now = new Date();
+      const status = await this.getStatusRaw();
+      if (!status) return;
+      return this.parseResult(status, now);
+    } catch (_) {
+      return;
+    }
+  }
+
+  private getStatusRaw(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      http
+        .get({ host: this.host, port: this.port, path: this.path, agent: this.agent }, res => {
+          const { statusCode } = res;
+          if (res.statusCode !== 200) {
+            res.resume();
+            return reject("请求失败\n" + `状态码: ${statusCode}`);
+          }
+          let rawData: string = "";
+          res.on("data", chunk => (rawData += chunk));
+          res.on("end", () => resolve(rawData));
+        })
+        .on("error", e => reject(e));
+    });
+  }
+
+  private parseResult(info: string = "", timestamp: Date) {
     const strArr = info.split("\n");
     if (strArr.length < REGS.length) return;
     const infoArr: RegExpMatchArray[] = [];
