@@ -54,7 +54,12 @@ if (config.influxdb) {
       logger.debug(sysInfo);
       data.push({ measurement: "sysinfo", tags: { host }, fields: sysInfo, timestamp });
       // 处理PM2信息
-      const pm2Data = await exec("pm2 jlist");
+      let pm2Data = await exec("pm2 jlist");
+      // 修复部分有前缀的结果
+      const fixIndex = pm2Data.indexOf("[");
+      if (fixIndex > 0) {
+        pm2Data.slice(fixIndex);
+      }
       const pm2Info = parsePM2Data(pm2Data) || [];
       for (const info of pm2Info) {
         data.push({ measurement: "app", tags: { host, app: info.name, ins: info.instance }, fields: info, timestamp });
