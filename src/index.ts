@@ -5,6 +5,7 @@ import Logger from "./utils/log";
 import exec from "./utils/exec";
 import parsePM2Data from "./utils/pm2";
 import NginxStatus from "./utils/nginx";
+import * as URL from "url";
 
 const config = initPmx();
 const logger = new Logger(config.debug);
@@ -28,9 +29,9 @@ if (config.influxdb) {
   // Nginx
   if (config.nginx) {
     try {
-      const url = new URL(config.nginx);
+      const url = URL.parse(config.nginx);
       logger.debug(url);
-      const ng = new NginxStatus({ host: url.host, port: Number(url.port || 80), path: url.pathname });
+      const ng = new NginxStatus({ host: url.host, port: Number(url.port || 80), path: url.path });
       setInterval(async function() {
         const info = await ng.getStatus();
         if (info) EVENTS.push([KEYS.Nginx, info]);
