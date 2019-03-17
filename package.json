@@ -1,6 +1,6 @@
 {
   "name": "pm2-guarded",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "pm2 guarded",
   "main": "dist/index.js",
   "dependencies": {

@@ -58,7 +58,7 @@ if (config.influxdb) {
       // 修复部分有前缀的结果
       const fixIndex = pm2Data.indexOf("[");
       if (fixIndex > 0) {
-        pm2Data.slice(fixIndex);
+        pm2Data = pm2Data.slice(fixIndex);
       }
       const pm2Info = parsePM2Data(pm2Data) || [];
       for (const info of pm2Info) {
