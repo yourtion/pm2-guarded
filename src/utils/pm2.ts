@@ -18,7 +18,7 @@ export default function parsePM2Data(data: string) {
       } as any;
       for (const k of Object.keys(axmMonitor)) {
         const v = axmMonitor[k];
-        if (!v.value) continue;
+        // if (!v.value) continue;
         const val = parseFloat(v.value);
         if (isNaN(val)) continue;
         ret[k] = val;
