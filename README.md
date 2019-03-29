@@ -6,6 +6,12 @@
 $ pm2 install pm2-guarded
 ```
 
+### Upgrade
+
+```bash
+$ pm2 module:update pm2-guarded
+```
+
 ### Send to influxdb
 
 ```bash
