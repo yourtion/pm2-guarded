@@ -14,8 +14,11 @@ enum KEYS {
   Nginx,
 }
 
+const MAX_DATAS_SIZE = 100;
 let EVENTS: [KEYS, any][] = [];
+let DATAS_WAITING: IPoint[][] = [];
 let SEDNING = false;
+let WAITING = 0;
 
 if (config.influxdb) {
   logger.info(config);
@@ -43,7 +46,7 @@ if (config.influxdb) {
 
   setInterval(async function() {
     if (SEDNING) return;
-    logger.debug("Start SEDNING");
+    logger.debug("Start Interval");
     SEDNING = true;
     try {
       const data: IPoint[] = [];
@@ -77,8 +80,21 @@ if (config.influxdb) {
             break;
         }
       }
-      await influx.writePoints(data);
+      DATAS_WAITING.push(data);
+      // 如果触发错误，等待
+      if (WAITING > 0) {
+        // 删除过多数据，防止程序爆掉
+        if (DATAS_WAITING.length > MAX_DATAS_SIZE) {
+          DATAS_WAITING.shift();
+        }
+        return WAITING--;
+      }
+      logger.debug("Start SEDNING");
+      await influx.writePoints(DATAS_WAITING.flatMap(x => x));
+      // 发送成功则删除等待发送数据列表
+      DATAS_WAITING = [];
     } catch (error) {
+      WAITING = 6;
       logger.error(error.message || error);
     } finally {
       SEDNING = false;
