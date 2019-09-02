@@ -10,6 +10,8 @@ import * as URL from "url";
 const config = initPmx();
 const logger = new Logger(config.debug);
 
+const flatMap = (f: any, arr: any[]) => arr.reduce((x, y) => [...x, ...f(y)], []);
+
 enum KEYS {
   Nginx,
 }
@@ -90,7 +92,7 @@ if (config.influxdb) {
         return WAITING--;
       }
       logger.debug("Start SEDNING");
-      await influx.writePoints(DATAS_WAITING.flatMap(x => x));
+      await influx.writePoints(flatMap((x: any) => x, DATAS_WAITING));
       // 发送成功则删除等待发送数据列表
       DATAS_WAITING = [];
     } catch (error) {
