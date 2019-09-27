@@ -2,7 +2,6 @@ import net from "net"
 import fs from "fs"
 import Logger from "./log"
 
-
 const logger = new Logger(false);
 
 /**
@@ -13,8 +12,8 @@ const logger = new Logger(false);
 export class SocketUpload {
     /** 接收到的数据 */
     records: string[] = []
-    /** 单位为秒数 */
-    timeGap = 10
+    /** 单位为毫秒数 */
+    timeGap = 10000
     constructor(timeGap: number) {
         this.timeGap = timeGap
     }
@@ -49,12 +48,10 @@ export class SocketUpload {
             })
         });
 
-
-
         setInterval(() => {
             const records = this.records;
             this.records = []
             onTick(records)
-        }, this.timeGap * 1000)
+        }, this.timeGap)
     }
 }

@@ -55,7 +55,10 @@ if (config.influxdb) {
   if (config.socketPath) {
     socketUpload.startServer(config.socketPath, async (datas) => {
       try {
-        await influx.writePoints(datas)
+        logger.debug("socket data", datas)
+        if (datas.length > 0) {
+          await influx.writePoints(datas)
+        }
       } catch (err) {
         logger.error("socketUpload error", err)
       }
@@ -124,7 +127,9 @@ if (config.influxdb) {
   // run empty loop
   logger.info("Run `pm2 set pm2-guarded:influxdb http://user:pass@host:port/db` to start monit");
   logger.info("Run `pm2 set pm2-guarded:nginx http://127.0.0.1/nginx_status` to add Nginx monit");
+  logger.info("Run `pm2 set pm2-guarded:socketPath /tmp/xxx` to add socket influxdb");
   logger.info("Run `pm2 set pm2-guarded:fetchInterval 1000` to set info fetch interval");
   logger.info("Run `pm2 set pm2-guarded:sendInterval 5000` to set data send interval");
+
   setInterval(() => { }, 60000);
 }
