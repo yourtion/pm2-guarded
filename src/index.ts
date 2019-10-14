@@ -23,6 +23,20 @@ let DATAS_WAITING: IPoint[][] = [];
 let SEDNING = false;
 let WAITING = 0;
 
+function startFetchNginx(fetchInterval: number) {
+  try {
+    const url = URL.parse(config.nginx);
+    logger.debug(url);
+    const ng = new NginxStatus({ host: url.host, port: Number(url.port || 80), path: url.path });
+    setInterval(async function() {
+      const info = await ng.getStatus();
+      if (info) EVENTS.push([KEYS.Nginx, info]);
+    }, fetchInterval);
+  } catch (error) {
+    logger.error("Nginx config error", error);
+  }
+}
+
 if (config.influxdb) {
   logger.info(config);
 
@@ -36,17 +50,7 @@ if (config.influxdb) {
 
   // Nginx
   if (config.nginx) {
-    try {
-      const url = URL.parse(config.nginx);
-      logger.debug(url);
-      const ng = new NginxStatus({ host: url.host, port: Number(url.port || 80), path: url.path });
-      setInterval(async function() {
-        const info = await ng.getStatus();
-        if (info) EVENTS.push([KEYS.Nginx, info]);
-      }, fetchInterval);
-    } catch (error) {
-      logger.error("Nginx config error", error);
-    }
+    startFetchNginx(fetchInterval);
   }
 
   // SocketUpload
