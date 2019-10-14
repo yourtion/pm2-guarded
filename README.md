@@ -24,6 +24,12 @@ $ pm2 set pm2-guarded:influxdb http://user:pass@host:port/db
 $ pm2 set pm2-guarded:nginx http://127.0.0.1/nginx_status
 ```
 
+### Add Proxy to influxdb
+
+```bash
+$ pm2 set pm2-guarded:socketPath /tmp/pm2-guarded.sock
+```
+
 ### Config
 
 - set info fetch interval `pm2 set pm2-guarded:fetchInterval 1000`
