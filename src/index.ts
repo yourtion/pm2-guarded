@@ -15,6 +15,7 @@ const flatMap = (f: any, arr: any[]) => arr.reduce((x, y) => [...x, ...f(y)], []
 
 enum KEYS {
   Nginx,
+  Socket,
 }
 
 const MAX_DATAS_SIZE = 100;
@@ -37,6 +38,21 @@ function startFetchNginx(fetchInterval: number) {
   }
 }
 
+function startSocketServer(dataInterval: number) {
+  const socketUpload = new SocketUpload(dataInterval);
+  socketUpload.startServer(config.socketPath, async datas => {
+    try {
+      logger.debug("socket data", datas);
+      if (datas.length < 1) return;
+      for (const data of datas) {
+        EVENTS.push([KEYS.Socket, data]);
+      }
+    } catch (err) {
+      logger.error("socketUpload error", err);
+    }
+  });
+}
+
 if (config.influxdb) {
   logger.info(config);
 
@@ -46,7 +62,6 @@ if (config.influxdb) {
 
   const system = new SystemInfo(fetchInterval);
   const influx = new InfluxDB(config.influxdb);
-  const socketUpload = new SocketUpload(dataInterval);
 
   // Nginx
   if (config.nginx) {
@@ -55,16 +70,7 @@ if (config.influxdb) {
 
   // SocketUpload
   if (config.socketPath) {
-    socketUpload.startServer(config.socketPath, async datas => {
-      try {
-        logger.debug("socket data", datas);
-        if (datas.length > 0) {
-          await influx.writePoints(datas);
-        }
-      } catch (err) {
-        logger.error("socketUpload error", err);
-      }
-    });
+    startSocketServer(dataInterval);
   }
 
   setInterval(async function() {
@@ -98,6 +104,9 @@ if (config.influxdb) {
           // 执行Nginx相关数据推送
           case KEYS.Nginx:
             data.push({ measurement: "nginx", tags: { host }, fields: event[1].data, timestamp: event[1].timestamp });
+            break;
+          case KEYS.Socket:
+            data.push({ measurement: "data", tags: { host, ...event[1].tags }, fields: event[1].fields, timestamp: event[1].timestamp });
             break;
           default:
             break;
