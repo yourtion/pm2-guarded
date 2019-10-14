@@ -6,6 +6,7 @@ import exec from "./utils/exec";
 import parsePM2Data from "./utils/pm2";
 import NginxStatus from "./utils/nginx";
 import * as URL from "url";
+import { SocketUpload } from "./utils/socket";
 
 const config = initPmx();
 const logger = new Logger(config.debug);
@@ -27,9 +28,13 @@ if (config.influxdb) {
 
   const fetchInterval = config.fetchInterval || 1000;
   const sendInterval = config.sendInterval || 5000;
+  const dataInterval = config.dataInterval || 5000;
+
 
   const system = new SystemInfo(fetchInterval);
   const influx = new InfluxDB(config.influxdb);
+  const socketUpload = new SocketUpload(dataInterval);
+
 
   // Nginx
   if (config.nginx) {
@@ -37,7 +42,7 @@ if (config.influxdb) {
       const url = URL.parse(config.nginx);
       logger.debug(url);
       const ng = new NginxStatus({ host: url.host, port: Number(url.port || 80), path: url.path });
-      setInterval(async function() {
+      setInterval(async function () {
         const info = await ng.getStatus();
         if (info) EVENTS.push([KEYS.Nginx, info]);
       }, fetchInterval);
@@ -46,7 +51,22 @@ if (config.influxdb) {
     }
   }
 
-  setInterval(async function() {
+  // SocketUpload
+  if (config.socketPath) {
+    socketUpload.startServer(config.socketPath, async (datas) => {
+      try {
+        logger.debug("socket data", datas)
+        if (datas.length > 0) {
+          await influx.writePoints(datas)
+        }
+      } catch (err) {
+        logger.error("socketUpload error", err)
+      }
+    })
+  }
+
+
+  setInterval(async function () {
     if (SEDNING) return;
     logger.debug("Start Interval");
     SEDNING = true;
@@ -107,7 +127,9 @@ if (config.influxdb) {
   // run empty loop
   logger.info("Run `pm2 set pm2-guarded:influxdb http://user:pass@host:port/db` to start monit");
   logger.info("Run `pm2 set pm2-guarded:nginx http://127.0.0.1/nginx_status` to add Nginx monit");
+  logger.info("Run `pm2 set pm2-guarded:socketPath /tmp/xxx` to add socket influxdb");
   logger.info("Run `pm2 set pm2-guarded:fetchInterval 1000` to set info fetch interval");
   logger.info("Run `pm2 set pm2-guarded:sendInterval 5000` to set data send interval");
-  setInterval(() => {}, 60000);
+
+  setInterval(() => { }, 60000);
 }
