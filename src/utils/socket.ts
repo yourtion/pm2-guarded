@@ -1,8 +1,21 @@
-import net from "net"
 import fs from "fs"
 import Logger from "./log"
+import { SocketParser } from "./socket-parser";
+import net from "net"
+
 
 const logger = new Logger(false);
+
+function isInfluxData(data: any) {
+    const fields = ["measurement", "tags", "fields", "timestamp"]
+    let isOk = true;
+    for (let field of fields) {
+        if (data[field] === undefined) {
+            isOk = false
+        }
+    }
+    return isOk
+}
 
 /**
  * 1、套接字接收数据传入
@@ -20,10 +33,31 @@ export class SocketUpload {
     startServer(path: string, onTick: (args: any[]) => void) {
         const server = net.createServer((c) => {
             logger.info("客户端成功接入")
+            let parser = new SocketParser()
+            parser.on("finish", (ret) => {
+                if (ret.data) {
+                    const list: any = JSON.parse(ret.data)
+                    const isOk = Array.isArray(list) && list.length > 0 && list.every(item => isInfluxData(item))
+                    if (isOk) {
+                        this.records.push(list);
+                        c.write("ok")
+                    } else {
+                        logger.debug("influxdb数据有误", ret.data)
+                        logger.error("influxdb数据有误");
+                        c.write("nil")
+                    }
+
+                }
+            })
+
+            parser.on("error", (err) => {
+                logger.error("解析数据失败", err)
+                c.write("nil")
+            })
+
             c.on('data', (data) => {
                 try {
-                    const arrs = data.toString().split("\n").filter(str => !!str).map(item => JSON.parse(item))
-                    this.records.push(...arrs)
+                    parser.parser(data)
                 } catch (err) {
                     logger.debug("解析json失败", err)
                     c.write("nil")
@@ -31,8 +65,12 @@ export class SocketUpload {
             })
             c.on('end', () => {
                 logger.info('客户端已断开连接')
+                parser.removeAllListeners();
+                (parser as any) = null
             });
         })
+
+
 
         server.listen(path, () => {
             logger.info('服务器已启动:' + path);

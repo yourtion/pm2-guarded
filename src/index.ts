@@ -41,7 +41,7 @@ if (config.influxdb) {
     try {
       const url = URL.parse(config.nginx);
       logger.debug(url);
-      const ng = new NginxStatus({ host: url.host, port: Number(url.port || 80), path: url.path });
+      const ng = new NginxStatus({ host: url.host!, port: Number(url.port || 80), path: url.path! });
       setInterval(async function () {
         const info = await ng.getStatus();
         if (info) EVENTS.push([KEYS.Nginx, info]);
@@ -53,11 +53,12 @@ if (config.influxdb) {
 
   // SocketUpload
   if (config.socketPath) {
+    logger.debug("gg", config.socketPath)
     socketUpload.startServer(config.socketPath, async (datas) => {
       try {
         logger.debug("socket data", datas)
         if (datas.length > 0) {
-          await influx.writePoints(datas)
+          DATAS_WAITING.push(datas)
         }
       } catch (err) {
         logger.error("socketUpload error", err)
