@@ -1,15 +1,15 @@
 {
   "name": "pm2-guarded",
-  "version": "0.8.2",
+  "version": "0.10.0",
   "description": "pm2 guarded",
   "main": "dist/index.js",
   "dependencies": {
-    "influx": "^5.0.7"
+    "influx": "^5.4.2"
   },
   "devDependencies": {
-    "@types/node": "^10.5.8",
-    "prettier": "^1.16.3",
-    "typescript": "^3.3.1"
+    "@types/node": "^12.7.12",
+    "prettier": "^1.18.2",
+    "typescript": "^3.7.2"
   },
   "scripts": {
     "dev": "pm2 kill && pm2 install . && pm2 logs 0",

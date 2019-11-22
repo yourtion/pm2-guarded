@@ -15,6 +15,7 @@ const flatMap = (f: any, arr: any[]) => arr.reduce((x, y) => [...x, ...f(y)], []
 
 enum KEYS {
   Nginx,
+  Socket,
 }
 
 const MAX_DATAS_SIZE = 100;
@@ -23,6 +24,35 @@ let DATAS_WAITING: IPoint[][] = [];
 let SEDNING = false;
 let WAITING = 0;
 
+function startFetchNginx(fetchInterval: number) {
+  try {
+    const url = URL.parse(config.nginx);
+    logger.debug(url);
+    const ng = new NginxStatus({ host: url.host, port: Number(url.port || 80), path: url.path });
+    setInterval(async function() {
+      const info = await ng.getStatus();
+      if (info) EVENTS.push([KEYS.Nginx, info]);
+    }, fetchInterval);
+  } catch (error) {
+    logger.error("Nginx config error", error);
+  }
+}
+
+function startSocketServer(dataInterval: number) {
+  const socketUpload = new SocketUpload(dataInterval);
+  socketUpload.startServer(config.socketPath, async datas => {
+    try {
+      logger.debug("socket data", datas);
+      if (datas.length < 1) return;
+      for (const data of datas) {
+        EVENTS.push([KEYS.Socket, data]);
+      }
+    } catch (err) {
+      logger.error("socketUpload error", err);
+    }
+  });
+}
+
 if (config.influxdb) {
   logger.info(config);
 
@@ -30,44 +60,20 @@ if (config.influxdb) {
   const sendInterval = config.sendInterval || 5000;
   const dataInterval = config.dataInterval || 5000;
 
-
   const system = new SystemInfo(fetchInterval);
   const influx = new InfluxDB(config.influxdb);
-  const socketUpload = new SocketUpload(dataInterval);
-
 
   // Nginx
   if (config.nginx) {
-    try {
-      const url = URL.parse(config.nginx);
-      logger.debug(url);
-      const ng = new NginxStatus({ host: url.host!, port: Number(url.port || 80), path: url.path! });
-      setInterval(async function () {
-        const info = await ng.getStatus();
-        if (info) EVENTS.push([KEYS.Nginx, info]);
-      }, fetchInterval);
-    } catch (error) {
-      logger.error("Nginx config error", error);
-    }
+    startFetchNginx(fetchInterval);
   }
 
   // SocketUpload
   if (config.socketPath) {
-    logger.debug("socket server path", config.socketPath)
-    socketUpload.startServer(config.socketPath, async (datas) => {
-      try {
-        logger.debug("socket data", datas)
-        if (datas.length > 0) {
-          DATAS_WAITING.push(datas)
-        }
-      } catch (err) {
-        logger.error("socketUpload error", err)
-      }
-    })
+    startSocketServer(dataInterval);
   }
 
-
-  setInterval(async function () {
+  setInterval(async function() {
     if (SEDNING) return;
     logger.debug("Start Interval");
     SEDNING = true;
@@ -98,6 +104,9 @@ if (config.influxdb) {
           // 执行Nginx相关数据推送
           case KEYS.Nginx:
             data.push({ measurement: "nginx", tags: { host }, fields: event[1].data, timestamp: event[1].timestamp });
+            break;
+          case KEYS.Socket:
+            data.push({ measurement: "data", tags: { host, ...event[1].tags }, fields: event[1].fields, timestamp: event[1].timestamp });
             break;
           default:
             break;
@@ -132,5 +141,5 @@ if (config.influxdb) {
   logger.info("Run `pm2 set pm2-guarded:fetchInterval 1000` to set info fetch interval");
   logger.info("Run `pm2 set pm2-guarded:sendInterval 5000` to set data send interval");
 
-  setInterval(() => { }, 60000);
+  setInterval(() => {}, 60000);
 }
