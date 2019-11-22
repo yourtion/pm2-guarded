@@ -106,7 +106,12 @@ if (config.influxdb) {
             data.push({ measurement: "nginx", tags: { host }, fields: event[1].data, timestamp: event[1].timestamp });
             break;
           case KEYS.Socket:
-            data.push({ measurement: "data", tags: { host, ...event[1].tags }, fields: event[1].fields, timestamp: event[1].timestamp });
+            data.push({
+              measurement: "data",
+              tags: { host, ...event[1].tags },
+              fields: event[1].fields,
+              timestamp: event[1].timestamp,
+            });
             break;
           default:
             break;
