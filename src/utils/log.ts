@@ -1,7 +1,7 @@
 export default class Logger {
   constructor(private logEnable: boolean) {}
 
-  debug(...args: any) {
+  debug(...args: any[]) {
     if (!this.logEnable) return;
     console.log(...args);
   }
