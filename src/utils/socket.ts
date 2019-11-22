@@ -39,7 +39,7 @@ export class SocketUpload {
                     const list: any = JSON.parse(ret.data)
                     const isOk = Array.isArray(list) && list.length > 0 && list.every(item => isInfluxData(item))
                     if (isOk) {
-                        this.records.push(list);
+                        this.records.push(...list);
                         c.write("ok")
                     } else {
                         logger.debug("influxdb数据有误", ret.data)
