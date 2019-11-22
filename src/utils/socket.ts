@@ -39,7 +39,9 @@ export class SocketUpload {
                     const list: any = JSON.parse(ret.data)
                     const isOk = Array.isArray(list) && list.length > 0 && list.every(item => isInfluxData(item))
                     if (isOk) {
-                        this.records.push(...list);
+                        for (let item of list) {
+                            this.records.push({ ...item, timestamp: item ? new Date(item.timestamp) : new Date() });
+                        }
                         c.write("ok")
                     } else {
                         logger.debug("influxdb数据有误", ret.data)
