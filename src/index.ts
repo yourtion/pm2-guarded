@@ -53,7 +53,7 @@ if (config.influxdb) {
 
   // SocketUpload
   if (config.socketPath) {
-    logger.debug("gg", config.socketPath)
+    logger.debug("socket server path", config.socketPath)
     socketUpload.startServer(config.socketPath, async (datas) => {
       try {
         logger.debug("socket data", datas)
