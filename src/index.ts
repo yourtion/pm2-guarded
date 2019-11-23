@@ -28,7 +28,7 @@ function startFetchNginx(fetchInterval: number) {
   try {
     const url = URL.parse(config.nginx);
     logger.debug(url);
-    const ng = new NginxStatus({ host: url.host, port: Number(url.port || 80), path: url.path });
+    const ng = new NginxStatus({ host: url.host!, port: Number(url.port || 80), path: url.path! });
     setInterval(async function() {
       const info = await ng.getStatus();
       if (info) EVENTS.push([KEYS.Nginx, info]);
