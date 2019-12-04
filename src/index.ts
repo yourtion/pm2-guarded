@@ -107,7 +107,7 @@ if (config.influxdb) {
             break;
           case KEYS.Socket:
             data.push({
-              measurement: "data",
+              measurement: event[1].measurement ? `data-${event[1].measurement}` : "data",
               tags: { host, ...event[1].tags },
               fields: event[1].fields,
               timestamp: event[1].timestamp,
