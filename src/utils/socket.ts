@@ -7,7 +7,7 @@ import net from "net"
 const logger = new Logger(false);
 
 function isInfluxData(data: any) {
-  const fields = ["measurement", "tags", "fields", "timestamp"]
+  const fields = ["tags", "fields", "timestamp"]
   let isOk = true;
   for (let field of fields) {
     if (data[field] === undefined) {
