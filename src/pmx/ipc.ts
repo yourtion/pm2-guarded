@@ -9,13 +9,13 @@ function serializer(replacer: replacerType | null = null, cycleReplacer: replace
   const keys: string[] = [];
 
   if (cycleReplacer == null) {
-    cycleReplacer = function(key: any, value: any) {
+    cycleReplacer = function (key: any, value: any) {
       if (stack[0] === value) return "[Circular ~]";
       return "[Circular ~." + keys.slice(0, stack.indexOf(value)).join(".") + "]";
     };
   }
 
-  return function(this: replacerType, key: any, value: any) {
+  return function (this: replacerType, key: any, value: any) {
     if (stack.length > 0) {
       const thisPos = stack.indexOf(this);
       ~thisPos ? stack.splice(thisPos + 1) : stack.push(this);

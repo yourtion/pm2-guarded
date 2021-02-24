@@ -31,7 +31,7 @@ export default class SystemInfo {
     // cpuUsage Info
     const startMeasure = computeUsage();
     const t = process.uptime();
-    setTimeout(_ => {
+    setTimeout((_) => {
       const endMeasure = computeUsage();
       const spent = Math.floor((process.uptime() - t) * 1000);
       const idleDifference = endMeasure.idle - startMeasure.idle;

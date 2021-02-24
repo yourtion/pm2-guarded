@@ -44,17 +44,17 @@ export default class NginxStatus {
   private getStatusRaw(): Promise<string> {
     return new Promise((resolve, reject) => {
       http
-        .get({ host: this.host, port: this.port, path: this.path, agent: this.agent }, res => {
+        .get({ host: this.host, port: this.port, path: this.path, agent: this.agent }, (res) => {
           const { statusCode } = res;
           if (res.statusCode !== 200) {
             res.resume();
             return reject("请求失败\n" + `状态码: ${statusCode}`);
           }
           let rawData: string = "";
-          res.on("data", chunk => (rawData += chunk));
+          res.on("data", (chunk) => (rawData += chunk));
           res.on("end", () => resolve(rawData));
         })
-        .on("error", e => reject(e));
+        .on("error", (e) => reject(e));
     });
   }
 

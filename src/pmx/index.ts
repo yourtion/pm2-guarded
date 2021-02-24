@@ -41,7 +41,7 @@ function configure(conf: any, do_not_tell_pm2 = false) {
       conf.module_conf = Object.assign(conf.module_conf, casted_conf);
 
       // Obfuscate passwords
-      Object.keys(conf.module_conf).forEach(function(key) {
+      Object.keys(conf.module_conf).forEach(function (key) {
         if ((key == "password" || key == "passwd") && conf.module_conf[key].length >= 1) {
           conf.module_conf[key] = "Password hidden";
         }

@@ -29,7 +29,7 @@ function startFetchNginx(fetchInterval: number) {
     const url = URL.parse(config.nginx);
     logger.debug(url);
     const ng = new NginxStatus({ host: url.host!, port: Number(url.port || 80), path: url.path! });
-    setInterval(async function() {
+    setInterval(async function () {
       const info = await ng.getStatus();
       if (info) EVENTS.push([KEYS.Nginx, info]);
     }, fetchInterval);
@@ -40,7 +40,7 @@ function startFetchNginx(fetchInterval: number) {
 
 function startSocketServer(dataInterval: number) {
   const socketUpload = new SocketUpload(dataInterval);
-  socketUpload.startServer(config.socketPath, async datas => {
+  socketUpload.startServer(config.socketPath, async (datas) => {
     try {
       logger.debug("socket data", datas);
       if (datas.length < 1) return;
@@ -73,7 +73,7 @@ if (config.influxdb) {
     startSocketServer(dataInterval);
   }
 
-  setInterval(async function() {
+  setInterval(async function () {
     if (SEDNING) return;
     logger.debug("Start Interval");
     SEDNING = true;

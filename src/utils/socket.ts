@@ -30,13 +30,13 @@ export class SocketUpload {
     this.timeGap = timeGap;
   }
   startServer(path: string, onTick: (args: any[]) => void) {
-    const server = net.createServer(c => {
+    const server = net.createServer((c) => {
       logger.info("客户端成功接入");
       let parser = new SocketParser();
-      parser.on("finish", ret => {
+      parser.on("finish", (ret) => {
         if (ret.data) {
           const list: any = JSON.parse(ret.data);
-          const isOk = Array.isArray(list) && list.length > 0 && list.every(item => isInfluxData(item));
+          const isOk = Array.isArray(list) && list.length > 0 && list.every((item) => isInfluxData(item));
           if (isOk) {
             for (let item of list) {
               this.records.push({ ...item, timestamp: item ? new Date(item.timestamp) : new Date() });
@@ -50,12 +50,12 @@ export class SocketUpload {
         }
       });
 
-      parser.on("error", err => {
+      parser.on("error", (err) => {
         logger.error("解析数据失败", err);
         c.write("nil");
       });
 
-      c.on("data", data => {
+      c.on("data", (data) => {
         try {
           parser.parser(data);
         } catch (err) {
