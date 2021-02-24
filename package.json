@@ -1,15 +1,18 @@
 {
   "name": "pm2-guarded",
-  "version": "0.10.3",
-  "description": "pm2 guarded",
+  "version": "0.11.0",
+  "description": "pm2-guarded 是一个 pm2 插件，通过将 pmx 获取运行应用的 metrics value 并整合上报到 Influxdb，同时通过 Grafana 可以进行展示。",
   "main": "dist/index.js",
   "dependencies": {
-    "influx": "^5.5.1"
+    "influx": "^5.7.0"
   },
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
-    "@types/node": "^12.12.11",
-    "prettier": "^1.19.1",
-    "typescript": "^3.7.2"
+    "@types/node": "^14.14.31",
+    "prettier": "^2.2.1",
+    "typescript": "^4.2.2"
   },
   "scripts": {
     "dev": "pm2 kill && pm2 install . && pm2 logs 0",
