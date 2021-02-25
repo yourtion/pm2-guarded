@@ -36,7 +36,9 @@ $ pm2 set pm2-guarded:nginx http://127.0.0.1/nginx_status
 
 ### Add Proxy to influxdb
 
-一个本地代理接口，可以通过该 socket 向 InfluxDB 上报本地其他数据
+一个本地代理接口，可以通过该 socket 向 InfluxDB 上报本地其他数据，主动上报数据，而不是等待 pm2-guarded 定时采集
+
+上报方法参考：[example/socket.ts](example/socket.ts)
 
 ```bash
 $ pm2 set pm2-guarded:socketPath /tmp/pm2-guarded.sock
